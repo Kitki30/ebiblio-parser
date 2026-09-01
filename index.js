@@ -121,13 +121,13 @@ function _parseListInternal(page, maxBooks=10) {
 }
 
 /**
- * Parses last added books
+ * Parses recently added books
  * 
  * @param {string} lastAddedPage - Raw HTML content of last_add page (/opacWeb/last_add/{libraryID})
  * @param {number} maxBooks - Max number of books to return (0 = infinite)
  * @returns {Array<{ name: string, author: string, url: string, imageURL: string }>} - Array with book objects
  */
-function parseLastAdded(lastAddedPage, maxBooks=10) {
+function parseRecentlyAdded(lastAddedPage, maxBooks=10) {
     return _parseListInternal(lastAddedPage, maxBooks);
 }
 
@@ -138,7 +138,7 @@ function parseLastAdded(lastAddedPage, maxBooks=10) {
  * @param {number} maxBooks - Max number of books to return (0 = infinite)
  * @returns {Array<{ name: string, author: string, url: string, imageURL: string }>} - Array with book objects
  */
-function parseLastLent(lastLendPage, maxBooks=10) {
+function parseRecentlyLent(lastLendPage, maxBooks=10) {
     return _parseListInternal(lastLendPage, maxBooks);
 }
 
