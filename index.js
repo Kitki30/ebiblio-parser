@@ -174,6 +174,26 @@ function parseRecommendedID(mainPageHtml) {
     }
 }
 
+/**
+ * Get library logo path
+ * 
+ * @param {string} logoInfoJson - Logo info json from /opacWeb/get_logo.json?bibId={library_id}
+ * @param {number} libraryId - Library ID
+ * @returns {{ exists: boolean, imageURL: string | undefined }}
+ */
+function parseLogoPath(logoInfoJson, libraryId) {
+    const json = JSON.parse(logoInfoJson);
+
+    const logoExists = json.logoExists;
+    let logoURL = undefined;
+
+    if (logoExists) {
+        logoURL = `/opacWeb/get_logo.${json.extension}?bibId=${libraryId}`;
+    }
+
+    return { exists: logoExists, imageURL: logoURL };
+}
+
 // For testing (node.js only)
 // const file = require("node:fs");
 // console.log(parseRecommendedID(file.readFileSync("example.html").toString()));
@@ -181,9 +201,10 @@ function parseRecommendedID(mainPageHtml) {
 module.exports = {
     parseLibraryInfo,
     parseBookSet,
-    parseLastAdded,
-    parseLastLent,
+    parseRecentlyAdded,
+    parseRecentlyLent,
     parseRecommendedID,
     checkLoggedIn,
-    deleteTelemetry
+    deleteTelemetry,
+    parseLogoPath
 }
