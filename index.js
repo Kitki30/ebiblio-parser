@@ -175,5 +175,16 @@ function parseRecommendedID(mainPageHtml) {
     }
 }
 
+// For testing (node.js only)
 // const file = require("node:fs");
 // console.log(parseRecommendedID(file.readFileSync("example.html").toString()));
+
+module.exports = {
+    parseLibraryInfo,
+    parseBookSet,
+    parseLastAdded,
+    parseLastLent,
+    parseRecommendedID,
+    checkLoggedIn,
+    deleteTelemetry
+}
