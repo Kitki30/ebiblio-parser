@@ -1,6 +1,4 @@
 const cheerio = require("cheerio");
-const { deepEqual } = require("node:assert");
-const file = require("node:fs");
 
 // Settings
 const allow_pii_logs = true; // Allow PII (Personally Identifiable Information) to logs, this may contain your school/library address, logins, emails, books etc.
@@ -170,8 +168,3 @@ function parseBookSet(bookSetPage, maxBooks=10) {
 
 
 // }
-
-
-// Tests
-console.log(parseLastAdded(file.readFileSync("last_added.html").toString()));
-console.log(parseLastAdded(file.readFileSync("recommended.html").toString()));
