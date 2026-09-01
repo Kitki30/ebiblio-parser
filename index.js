@@ -1,21 +1,21 @@
 const linkedom = require("linkedom");
 
 // Settings
-const allow_pii_logs = true; // Allow PII (Personally Identifiable Information) to logs, this may contain your school/library address, logins, emails, books etc.
-const no_telemetry = true; // Enable to replace "?from=" query parameters with nothing
+const allowPIILogs = true; // Allow PII (Personally Identifiable Information) to logs, this may contain your school/library address, logins, emails, books etc.
+const noTelemetry = true; // Enable to replace "?from=" query parameters with nothing
 
-if (allow_pii_logs) console.warn("Allow PII Logs is on, library will log your personal info on error for better debugging!");
+if (allowPIILogs) console.warn("Allow PII Logs is on, library will log your personal info on error for better debugging!");
 
 /**
  * Deletes known telemetry from URLs (like ?from= query params)
  * 
  * @param {string} url - URL
- * @returns {string} - URL without telemetry (if no_telemetry is on)
+ * @returns {string} - URL without telemetry (if noTelemetry is on)
  */
 function deleteTelemetry(url) {
     // TODO: Rewrite this thing
 
-    if (no_telemetry) {
+    if (noTelemetry) {
         // ?from= query params
         url = url.replace("?from=lastAdd", "");
         url = url.replace("?from=mostLended", ""); // They made a language error here lol
@@ -42,7 +42,7 @@ function parseLibraryInfo(mainPageHtml) {
 
     // Check if parsed successfully
     if (parsedHeader.length < 3) {
-        throw new Error(`Parsed header array length is less than 3 (Length: ${parsed_header.length}), invalid html file?`);
+        throw new Error(`Parsed header array length is less than 3 (Length: ${parsedHeader.length}), invalid html file?`);
     }
 
     const libraryName = parsedHeader[0];
@@ -60,7 +60,7 @@ function parseLibraryInfo(mainPageHtml) {
         if (parsedHeader.length != 3) {
             console.warn(`Error parsing library info! Header doesn't match any type (Array length: ${parsedHeader.length}, should be 3 or 4)`);
 
-            if (allow_pii_logs) {
+            if (allowPIILogs) {
                 console.warn("Allow PII logs is on, dropping info:");
                 console.warn(parsedHeader);
             }
@@ -115,7 +115,6 @@ function _parseListInternal(page, maxBooks=10) {
         bookURL = deleteTelemetry(bookURL); // Delete telemetry
 
         books.push({ name: bookName, author: bookAuthor, url: bookURL, imageURL: bookCoverImage });
-        i++;
     };
 
     return books;
