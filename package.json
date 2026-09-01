@@ -1,0 +1,20 @@
+{
+  "name": "ebiblio-parser",
+  "version": "1.0.0",
+  "description": "This library helps to parse Librus(R) e-biblioteka html files to usable data.",
+  "homepage": "https://github.com/kitki30/ebiblio-parser#readme",
+  "bugs": {
+    "url": "https://github.com/kitki30/ebiblio-parser/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/kitki30/ebiblio-parser.git"
+  },
+  "license": "Apache-2.0",
+  "author": "Kitki30",
+  "type": "commonjs",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  }
+}
