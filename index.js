@@ -1,4 +1,4 @@
-const cheerio = require("cheerio");
+const linkedom = require("linkedom");
 
 // Settings
 const allow_pii_logs = true; // Allow PII (Personally Identifiable Information) to logs, this may contain your school/library address, logins, emails, books etc.
@@ -30,12 +30,12 @@ function deleteTelemetry(url) {
  * @returns {{name: string, street: string, city: string} | null} - Parsed library data from html (Library name, street name and city name)
  */
 function parseLibraryInfo(mainPageHtml) {
-    const $ = cheerio.load(mainPageHtml);
+    const { document } = linkedom.parseHTML(mainPageHtml);
 
     // Parse header from html
     const parsedHeader = 
-        $("h2.header-library-info")
-        .text() // Parse text from header
+        document.querySelector("h2.header-library-info")
+        .textContent // Parse text from header
         .split("\n") // Split by newlines
         .map(line => line.trim()) // Trim lines from spaces
         .filter(Boolean); // Filter empty entries
@@ -85,13 +85,9 @@ function checkLoggedIn(mainPageHtml) {
 
     // If logged in, also parse login
     if (loggedIn) {
-        const $ = cheerio.load(mainPageHtml);
+        const { document } = linkedom.parseHTML(mainPageHtml);
 
-        if (!$) {
-            console.warn("Could not load page into cheerio! Please check if document is valid");
-        } else {
-            login = $("div.logged-as").attr("data-original-title"); // Parse login from data-original-title argument
-        }
+        login = document.querySelector("div.logged-as").getAttribute("data-original-title"); // Parse login from data-original-title argument
     }
     
     return { loggedIn: loggedIn, login: login };
@@ -99,27 +95,28 @@ function checkLoggedIn(mainPageHtml) {
 
 // Helper for all list parsing functions
 function _parseListInternal(page, maxBooks=10) {
-    const $ = cheerio.load(page);
-    const carousel = $(".owl-carousel__element"); // Parse all book objects (from carousel)
+    const { document } = linkedom.parseHTML(page);
+    const carousel = document.querySelectorAll(".owl-carousel__element"); // Parse all book objects (from carousel)
 
     if (maxBooks == 0) maxBooks = carousel.length; // Set maxBooks to carousel length if its 0
     else if (maxBooks > carousel.length) maxBooks = carousel.length; // Set maxBooks to carousel length if its bigger than carousel length
 
     let books = [];
 
-    carousel.each(function (i, book) {
-        if (i >= maxBooks) return false;
+    for (let i = 0; i < maxBooks; i++) {
+        if (i >= maxBooks) break;
         
-        let bookObject = $(book);
-        let bookURL = bookObject.find("a").attr("href");
-        let bookCoverImage = bookObject.find("img").attr("src");
-        let bookName = bookObject.find(".owl-carousel__title").text().trim();
-        let bookAuthor = bookObject.find(".owl-carousel__author").text().trim(); 
+        const book = carousel[i];
+        let bookURL = book.querySelector("a").getAttribute("href");
+        let bookCoverImage = book.querySelector("img").getAttribute("src");
+        let bookName = book.querySelector(".owl-carousel__title").textContent.trim();
+        let bookAuthor = book.querySelector(".owl-carousel__author").textContent.trim(); 
 
         bookURL = deleteTelemetry(bookURL); // Delete telemetry
 
         books.push({ name: bookName, author: bookAuthor, url: bookURL, imageURL: bookCoverImage });
-    });
+        i++;
+    };
 
     return books;
 }
@@ -164,19 +161,19 @@ function parseBookSet(bookSetPage, maxBooks=10) {
  * @returns {number | null} - ID of bookset or null if not found
  */
 function parseRecommendedID(mainPageHtml) {
-    const $ = cheerio.load(mainPageHtml);
+    const { document } = linkedom.parseHTML(mainPageHtml);
 
-    const legend = $("legend:contains('Polecane przez bibliotekarza')");
+    const legend = document.querySelector("legend:contains('Polecane przez bibliotekarza')");
 
-    const displayField = legend.parent();
-    const url = displayField.find("a");
+    const displayField = legend.parentNode;
+    const url = displayField.querySelector("a");
 
     if (url) {
-        return url.attr("href").split("/")[5];
+        return url.getAttribute("href").split("/")[5];
     } else {
         return null;
     }
 }
 
 // const file = require("node:fs");
-// console.log(parseRecommendedID(file.readFileSync("example.nologin.html")));
+// console.log(parseRecommendedID(file.readFileSync("example.html").toString()));
