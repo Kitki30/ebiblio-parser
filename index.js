@@ -158,13 +158,25 @@ function parseBookSet(bookSetPage, maxBooks=10) {
 }
 
 /**
- * Get "Polecane przez bibliotekarza" book set ID
+ * Get "Polecane przez bibliotekarza" (Recommended by librarian) book set ID
  * 
  * @param {string} mainPageHtml - Raw HTML content of main page (/opacWeb/bstart/{libraryID})
  * @returns {number | null} - ID of bookset or null if not found
  */
-// function parseRecommendedID(mainPageHtml) {
-//     const $ = cheerio.load(mainPageHtml);
+function parseRecommendedID(mainPageHtml) {
+    const $ = cheerio.load(mainPageHtml);
 
+    const legend = $("legend:contains('Polecane przez bibliotekarza')");
 
-// }
+    const displayField = legend.parent();
+    const url = displayField.find("a");
+
+    if (url) {
+        return url.attr("href").split("/")[5];
+    } else {
+        return null;
+    }
+}
+
+// const file = require("node:fs");
+// console.log(parseRecommendedID(file.readFileSync("example.nologin.html")));
