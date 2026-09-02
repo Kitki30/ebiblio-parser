@@ -70,7 +70,7 @@ Returns your previously lent books
 
 ### /opacWeb/item/{library_id}/show_record/{book_id}
 - Auth?: No
-- Parser function: ``getBookInfo()``
+- Parser function: ``parseBookInfo()``
 
 Returns book info
 

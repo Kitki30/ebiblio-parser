@@ -248,10 +248,11 @@ function parseVersion(mainPageHtml) {
  *  wolneLektury: boolean,
  *  wolneLekturyURL: string | null,
  *  available: number,
- *  lent: number
+ *  lent: number,
+ *  lastUpdate: string | null
  * }}
  */
-function getBookInfo(bookPage) {
+function parseBookInfo(bookPage) {
     const { document } = linkedom.parseHTML(bookPage);
 
     const fieldNames = document.querySelectorAll("div.content[role=main] div.record__label");
@@ -395,6 +396,9 @@ function getBookInfo(bookPage) {
         wolneLekturyURL = wolneLekturyBadge.parentNode.getAttribute("href"); // Parse URL to Wolne Lektury
     }
 
+    // Parse last update
+    let lastUpdate = cleanField(document.querySelector(".record-last-update").textContent.replace("Ostatnio aktualizowano: ", ""));
+
     // Warning! Some books have other info, so some of this may be null
     // Some books have tags in author field (e.g. "Mickiewicz, Adam (1798-1855)"),
     // these tags are author's date of birth and/or date of death (Or nothing if author is still alive, e.g. "Kosmowska, Barbara (1958- )")
@@ -419,7 +423,8 @@ function getBookInfo(bookPage) {
         lent: lent, // Number of books that are currently lent
         nationalLibrary: nationalLibrary, // true if book has a record in Polish National Library 
         wolneLektury: wolneLektury, // true if book is free to read in WolneLektury service (Data from your library, this doesn't call WolneLektury API)
-        wolneLekturyURL: wolneLekturyURL // URL to WolneLektury if book is free to read in this service 
+        wolneLekturyURL: wolneLekturyURL, // URL to WolneLektury if book is free to read in this service 
+        lastUpdate: lastUpdate
     }
 }
 
@@ -437,5 +442,6 @@ module.exports = {
     checkLoggedIn,
     deleteTelemetry,
     parseLogoPath,
-    parseVersion
+    parseVersion,
+    parseBookInfo
 }
