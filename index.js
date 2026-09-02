@@ -231,7 +231,10 @@ function parseVersion(mainPageHtml) {
  *  author: string | null,
  *  coauthor: string | null,
  *  title: string | null,
+ *  titleVariant: string | null,
+ *  description: string | null,
  *  type: string | null,
+ *  field: string | null,
  *  series: string | null,
  *  genre: string | null,
  *  topic: string | null,
@@ -262,7 +265,10 @@ function parseBookInfo(bookPage) {
     let author = null;
     let coauthor = null;
     let title = null;
+    let titleVariant = null;
+    let description = null;
     let type = null;
+    let field = null;
     let series = null;
     let genre = null;
     let topic = null;
@@ -295,6 +301,21 @@ function parseBookInfo(bookPage) {
             // Title
             case "Tytuł":
                 if (!title) title = fieldClean;
+                break;
+
+            // Title variant
+            case "Wariant tytułu":
+                if (!titleVariant) titleVariant = fieldClean;
+                break;
+
+            // Description
+            case "Opis":
+                if (!description) description = fieldClean;
+                break;
+
+            // Field
+            case "Dziedzina":
+                if (!field) field = fieldClean;
                 break;
 
             // Type
@@ -406,7 +427,10 @@ function parseBookInfo(bookPage) {
         author: author,
         coauthor: coauthor, // Other authors like illustrators
         title: title,
+        titleVariant: titleVariant,
+        description: description,
         type: type, // Form (e.g. book) and type (e.g. poetry) - "Książki, Poezja" / "Books, Poetry"
+        field: field, // Dziedzina
         series: series,
         genre: genre,
         topic: topic,
