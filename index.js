@@ -418,7 +418,7 @@ function parseBookInfo(bookPage) {
     }
 
     // Parse last update
-    let lastUpdate = cleanField(document.querySelector(".record-last-update").textContent.replace("Ostatnio aktualizowano: ", ""));
+    let lastUpdate = cleanField(document.querySelector(".record-last-update").textContent).replaceAll("Ostatnio aktualizowano: ", "");
 
     // Warning! Some books have other info, so some of this may be null
     // Some books have tags in author field (e.g. "Mickiewicz, Adam (1798-1855)"),
