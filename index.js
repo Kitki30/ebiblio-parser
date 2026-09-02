@@ -194,9 +194,30 @@ function parseLogoPath(logoInfoJson, libraryId) {
     return { exists: logoExists, imageURL: logoURL };
 }
 
+/**
+ * Parses OPAC version from footer
+ * 
+ * @param {string} mainPageHtml - Raw HTML content of main page (/opacWeb/bstart/{libraryID})
+ * @returns {{ major: number, minor: number, patch: number }} - OPAC Version
+ */
+function parseVersion(mainPageHtml) {
+    const { document } = linkedom.parseHTML(mainPageHtml);
+
+    const versionElement = document.querySelector("div.footer__title");
+    if (!versionElement) return null;
+
+    const footerText = "OPAC e-Biblioteka - katalog online - dostęp dla czytelników bibliotek szkolnych, wersja "; // To remove
+    const versionString = versionElement.textContent.replace(footerText, "").trim(); // Remove footer text
+    const versionArray = versionString.split(".").map(i => Number.parseInt(i)); // Split to array and convert to int
+
+    console.log("E-Biblioteka v" + versionString + " detected!");
+
+    return { major: versionArray[0], minor: versionArray[1], patch: versionArray[2] }
+}
+
 // For testing (node.js only)
 // const file = require("node:fs");
-// console.log(parseRecommendedID(file.readFileSync("example.html").toString()));
+// console.log(parseVersion(file.readFileSync("example.html").toString()));
 
 module.exports = {
     parseLibraryInfo,
@@ -206,5 +227,6 @@ module.exports = {
     parseRecommendedID,
     checkLoggedIn,
     deleteTelemetry,
-    parseLogoPath
+    parseLogoPath,
+    parseVersion
 }
