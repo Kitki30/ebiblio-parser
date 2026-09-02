@@ -10,21 +10,27 @@ Base domain: ``https://biblioteka.librus.pl``
 
 ## Endpoints
 
+### /opacWeb/bstart/{library_id}
+- Auth?: No
+- Parser functions: ``parseLibraryInfo(), checkLoggedIn(), parseRecommendedID(), parseVersion()``
+
+Returns HTML with library info, user info, version and "recommended by librarian" bookset id
+
 ### /opacWeb/last_lend/{library_id}
 - Auth?: No
-- Parser function: parseRecentlyLent()
+- Parser function: ``parseRecentlyLent()``
 
 Returns HTML file with carousel of recently borrowed books (entire library)
 
 ### /opacWeb/last_add/{library_id}
 - Auth?: No
-- Parser function: parseRecentlyAdded()
+- Parser function: ``parseRecentlyAdded()``
 
 Returns HTML file with carousel of recently added books
 
 ### /opacWeb/get_logo.json?bibId={library_id}
 - Auth?: No
-- Parser function: parseLogoPath()
+- Parser function: ``parseLogoPath()``
 
 Returns json with libraries logo extension
 
