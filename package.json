@@ -12,8 +12,8 @@
   },
   "license": "Apache-2.0",
   "author": "Kitki30",
-  "type": "commonjs",
-  "main": "index.js",
+  "type": "module",
+  "exports": "./index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },

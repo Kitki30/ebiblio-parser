@@ -1,4 +1,4 @@
-const linkedom = require("linkedom");
+import * as linkedom from "linkedom";
 
 // Settings
 const allowPIILogs = true; // Allow PII (Personally Identifiable Information) to logs, this may contain your school/library address, logins, emails, books etc.
@@ -20,7 +20,7 @@ function cleanField(text) {
  * @param {string} url - URL
  * @returns {string} - URL without telemetry (if noTelemetry is on)
  */
-function deleteTelemetry(url) {
+export function deleteTelemetry(url) {
     // TODO: Rewrite this thing
 
     if (noTelemetry) {
@@ -37,7 +37,7 @@ function deleteTelemetry(url) {
  * @param {string} mainPageHtml - Raw HTML content of main page (/opacWeb/bstart/{libraryID})
  * @returns {{name: string, street: string, city: string} | null} - Parsed library data from html (Library name, street name and city name)
  */
-function parseLibraryInfo(mainPageHtml) {
+export function parseLibraryInfo(mainPageHtml) {
     const { document } = linkedom.parseHTML(mainPageHtml);
 
     // Parse header from html
@@ -86,7 +86,7 @@ function parseLibraryInfo(mainPageHtml) {
  * 
  * @param {string} mainPageHtml - Raw HTML content of main page (/opacWeb/bstart/{libraryID})
  */
-function checkLoggedIn(mainPageHtml) {
+export function checkLoggedIn(mainPageHtml) {
     // Check if "zalogowany" variable is true or false
     const loggedIn = mainPageHtml.includes("var zalogowany = true;");
     let login = null;
@@ -135,7 +135,7 @@ function _parseListInternal(page, maxBooks=10) {
  * @param {number} maxBooks - Max number of books to return (0 = infinite)
  * @returns {Array<{ name: string, author: string, url: string, imageURL: string }>} - Array with book objects
  */
-function parseRecentlyAdded(lastAddedPage, maxBooks=10) {
+export function parseRecentlyAdded(lastAddedPage, maxBooks=10) {
     return _parseListInternal(lastAddedPage, maxBooks);
 }
 
@@ -146,7 +146,7 @@ function parseRecentlyAdded(lastAddedPage, maxBooks=10) {
  * @param {number} maxBooks - Max number of books to return (0 = infinite)
  * @returns {Array<{ name: string, author: string, url: string, imageURL: string }>} - Array with book objects
  */
-function parseRecentlyLent(lastLendPage, maxBooks=10) {
+export function parseRecentlyLent(lastLendPage, maxBooks=10) {
     return _parseListInternal(lastLendPage, maxBooks);
 }
 
@@ -157,7 +157,7 @@ function parseRecentlyLent(lastLendPage, maxBooks=10) {
  * @param {number} maxBooks - Max number of books to return (0 = infinite)
  * @returns {Array<{ name: string, author: string, url: string, imageURL: string }>} - Array with book objects
  */
-function parseBookSet(bookSetPage, maxBooks=10) {
+export function parseBookSet(bookSetPage, maxBooks=10) {
     return _parseListInternal(bookSetPage, maxBooks);
 }
 
@@ -167,7 +167,7 @@ function parseBookSet(bookSetPage, maxBooks=10) {
  * @param {string} mainPageHtml - Raw HTML content of main page (/opacWeb/bstart/{libraryID})
  * @returns {number | null} - ID of bookset or null if not found
  */
-function parseRecommendedID(mainPageHtml) {
+export function parseRecommendedID(mainPageHtml) {
     const { document } = linkedom.parseHTML(mainPageHtml);
 
     const legend = document.querySelector("legend:contains('Polecane przez bibliotekarza')");
@@ -189,7 +189,7 @@ function parseRecommendedID(mainPageHtml) {
  * @param {number} libraryId - Library ID
  * @returns {{ exists: boolean, imageURL: string | undefined }}
  */
-function parseLogoPath(logoInfoJson, libraryId) {
+export function parseLogoPath(logoInfoJson, libraryId) {
     const json = JSON.parse(logoInfoJson);
 
     const logoExists = json.logoExists;
@@ -208,7 +208,7 @@ function parseLogoPath(logoInfoJson, libraryId) {
  * @param {string} mainPageHtml - Raw HTML content of main page (/opacWeb/bstart/{libraryID})
  * @returns {{ major: number, minor: number, patch: number }} - OPAC Version
  */
-function parseVersion(mainPageHtml) {
+export function parseVersion(mainPageHtml) {
     const { document } = linkedom.parseHTML(mainPageHtml);
 
     const versionElement = document.querySelector("div.footer__title");
@@ -255,7 +255,7 @@ function parseVersion(mainPageHtml) {
  *  lastUpdate: string | null
  * }}
  */
-function parseBookInfo(bookPage) {
+export function parseBookInfo(bookPage) {
     const { document } = linkedom.parseHTML(bookPage);
 
     const fieldNames = document.querySelectorAll("div.content[role=main] div.record__label");
@@ -458,7 +458,7 @@ function parseBookInfo(bookPage) {
  * @param {string} historyPage - HTML of account page from https://biblioteka.librus.pl/opacWeb/history
  * @returns {Array<{ type: string, inventoryNumber: string, signature: string, title: string, author: string, lendDate: string, returnDate: string, bookURL: string }>}
  */
-function parseHistory(historyPage) {
+export function parseHistory(historyPage) {
     const { document } = linkedom.parseHTML(historyPage);
 
     // Get table
@@ -545,20 +545,6 @@ function parseHistory(historyPage) {
 }
 
 // For testing (node.js only)
-const file = require("node:fs");
+// import * as file from 'node:fs';
 // console.log(parseBookInfo(file.readFileSync("monster.html").toString()));
 // console.log(parseHistory(file.readFileSync("history.html").toString()));
-
-module.exports = {
-    parseLibraryInfo,
-    parseBookSet,
-    parseRecentlyAdded,
-    parseRecentlyLent,
-    parseRecommendedID,
-    checkLoggedIn,
-    deleteTelemetry,
-    parseLogoPath,
-    parseVersion,
-    parseBookInfo,
-    parseHistory
-}
