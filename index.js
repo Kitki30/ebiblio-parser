@@ -1,5 +1,4 @@
 const linkedom = require("linkedom");
-const { sign } = require("node:crypto");
 
 // Settings
 const allowPIILogs = true; // Allow PII (Personally Identifiable Information) to logs, this may contain your school/library address, logins, emails, books etc.
