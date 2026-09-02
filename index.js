@@ -6,6 +6,14 @@ const noTelemetry = true; // Enable to replace "?from=" query parameters with no
 
 if (allowPIILogs) console.warn("Allow PII Logs is on, library will log your personal info on error for better debugging!");
 
+function cleanField(text) {
+    return text
+        .replaceAll("\n", "") // Delete all new lines (Because e-biblio maintainers like spaces)
+        .replaceAll(/\s{2,}/g, ' ') // Replace all double spaces with one space
+        .replaceAll(" ,", ",") // Fix commas
+        .trim();
+}
+
 /**
  * Deletes known telemetry from URLs (like ?from= query params)
  * 
@@ -215,9 +223,210 @@ function parseVersion(mainPageHtml) {
     return { major: versionArray[0], minor: versionArray[1], patch: versionArray[2] }
 }
 
+/**
+ * Parses book info
+ * 
+ * @param {string} bookPage - Book page HTML from /opacWeb/item/{library_id}/show_record/{book_id}
+ * @returns {{
+ *  author: string | null,
+ *  coauthor: string | null,
+ *  title: string | null,
+ *  type: string | null,
+ *  series: string | null,
+ *  genre: string | null,
+ *  topic: string | null,
+ *  audience: string | null,
+ *  publisher: string | null,
+ *  releaseYear: string | null,
+ *  volume: string | null,
+ *  publicationLocation: string | null, 
+ *  edition: string | null,
+ *  timeOfWriting: string | null,
+ *  isbn: string | null,
+ *  udc: string | null,
+ *  nationalLibrary: boolean,
+ *  wolneLektury: boolean,
+ *  wolneLekturyURL: string | null,
+ *  available: number,
+ *  lent: number
+ * }}
+ */
+function getBookInfo(bookPage) {
+    const { document } = linkedom.parseHTML(bookPage);
+
+    const fieldNames = document.querySelectorAll("div.content[role=main] div.record__label");
+    const fields = document.querySelectorAll("div.content[role=main] div.record__text");
+
+    // Parsed from main list
+    let author = null;
+    let coauthor = null;
+    let title = null;
+    let type = null;
+    let series = null;
+    let genre = null;
+    let topic = null;
+    let audience = null;
+    let publisher = null;
+    let releaseYear = null;
+    let volume = null;
+    let publicationLocation = null;
+    let edition = null;
+    let timeOfWriting = null;
+    let isbn = null;
+    let udc = null;
+
+    for (let i = 0; i < fieldNames.length; i++) {
+        // Clean field
+        const fieldName = cleanField(fieldNames[i].textContent.trim());
+        const fieldClean = cleanField(fields[i].textContent);
+
+        switch (fieldName) {
+            // Author
+            case "Autor":
+                if (!author) author = fieldClean;
+                break;
+
+            // Co-author(s)
+            case "Współautor":
+                if (!coauthor) coauthor = fieldClean;
+                break;
+
+            // Title
+            case "Tytuł":
+                if (!title) title = fieldClean;
+                break;
+
+            // Type
+            case "Forma i typ":
+                if (!type) type = fieldClean;
+                break;
+
+            // Series
+            case "Seria":
+                if (!series) series = fieldClean;
+                break;
+
+            // Genre
+            case "Gatunek":
+                if (!genre) genre = fieldClean;
+                break;
+
+            // Topic
+            case "Temat":
+                if (!topic) topic = fieldClean;
+                break;
+
+            // Audience
+            case "Odbiorca":
+                if (!audience) audience = fieldClean;
+                break;
+
+            // Publisher
+            case "Wydawca":
+                if (!publisher) publisher = fieldClean;
+                break;
+
+            // Release year
+            case "Rok wydania":
+                if (!releaseYear) releaseYear = fieldClean;
+                break;
+
+            // Volume
+            case "Objętość":
+                if (!volume) volume = fieldClean;
+                break;
+
+            // Publication location
+            case "Miejsce wydania":
+                if (!publicationLocation) publicationLocation = fieldClean;
+                break;
+
+            // Edition
+            case "Wydanie":
+                if (!edition) edition = fieldClean;
+                break;
+
+            // Time of writing
+            case "Czas powstania":
+                if (!timeOfWriting) timeOfWriting = fieldClean;
+                break;
+
+            // ISBN
+            case "ISBN/ISSN":
+                if (!isbn) isbn = fieldClean;
+                break;
+
+            // UDC
+            case "UKD":
+                if (!udc) udc = fieldClean;
+                break;
+
+            // Fallback if unknown
+            default:
+                console.warn(`Unknown field '${fieldName}' with value '${fieldClean}'`);
+                break;
+        }
+    }
+
+    // Parse book count
+    let availableToLend = 0;
+    let lent = 0;
+
+    const lendStatusObject = document.querySelector("div.buttons-toolbar-borrow-numbers");
+    if (lendStatusObject) {
+        const availableToLendText = lendStatusObject.querySelector("div").textContent;
+        const lentText = lendStatusObject.querySelector("div.col-md-offset-2").textContent;
+
+        availableToLend = Number.parseInt(cleanField(availableToLendText).replace("Do wypożyczenia: ", ""));
+        lent = Number.parseInt(cleanField(lentText).replace("W wypożyczeniu: ", ""));
+    }
+
+    // Parsed from badges
+    let nationalLibrary = false;
+    let wolneLektury = false;
+    let wolneLekturyURL = null;
+
+    const nationalLibraryBadge = document.querySelector("img[title='Rekord bibliograficzny z Biblioteki Narodowej']"); // Parse national library badge
+    if (nationalLibraryBadge) nationalLibrary = true;
+
+    const wolneLekturyBadge = document.querySelector("img[title='Rekord dostępny w serwisie Wolne Lektury']"); // Parse Wolne Lektury badge
+    if (wolneLekturyBadge) {
+        wolneLektury = true;
+        wolneLekturyURL = wolneLekturyBadge.parentNode.getAttribute("href"); // Parse URL to Wolne Lektury
+    }
+
+    // Warning! Some books have other info, so some of this may be null
+    // Some books have tags in author field (e.g. "Mickiewicz, Adam (1798-1855)"),
+    // these tags are author's date of birth and/or date of death (Or nothing if author is still alive, e.g. "Kosmowska, Barbara (1958- )")
+    return { 
+        author: author,
+        coauthor: coauthor, // Other authors like illustrators
+        title: title,
+        type: type, // Form (e.g. book) and type (e.g. poetry) - "Książki, Poezja" / "Books, Poetry"
+        series: series,
+        genre: genre,
+        topic: topic,
+        audience: audience, // Targed ages or something
+        publisher: publisher,
+        releaseYear: releaseYear,
+        volume: volume, // In pages or something else
+        publicationLocation: publicationLocation,
+        edition: edition,
+        timeOfWriting: timeOfWriting, // Time of writing of the book (e.g. "1801-1900")
+        isbn: isbn, // Book ISBN
+        udc: udc, // Book ID (see https://en.wikipedia.org/wiki/Universal_Decimal_Classification)
+        available: availableToLend, // Number of books available to lend
+        lent: lent, // Number of books that are currently lent
+        nationalLibrary: nationalLibrary, // true if book has a record in Polish National Library 
+        wolneLektury: wolneLektury, // true if book is free to read in WolneLektury service (Data from your library, this doesn't call WolneLektury API)
+        wolneLekturyURL: wolneLekturyURL // URL to WolneLektury if book is free to read in this service 
+    }
+}
+
 // For testing (node.js only)
 // const file = require("node:fs");
-// console.log(parseVersion(file.readFileSync("example.html").toString()));
+// console.log(getBookInfo(file.readFileSync("pantadeusz.html").toString()));
+// console.log(getBookInfo(file.readFileSync("book.html").toString()));
 
 module.exports = {
     parseLibraryInfo,
