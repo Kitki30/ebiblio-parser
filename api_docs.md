@@ -64,7 +64,7 @@ Returns your lent books and expiry dates
 
 ### /opacWeb/history
 - Auth?: Yes
-- Parser function: no parser yet
+- Parser function: ``parseHistory()``
 
 Returns your previously lent books
 

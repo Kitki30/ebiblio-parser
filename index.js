@@ -1,4 +1,5 @@
 const linkedom = require("linkedom");
+const { sign } = require("node:crypto");
 
 // Settings
 const allowPIILogs = true; // Allow PII (Personally Identifiable Information) to logs, this may contain your school/library address, logins, emails, books etc.
@@ -452,10 +453,102 @@ function parseBookInfo(bookPage) {
     }
 }
 
+/**
+ * Parses lending history
+ * 
+ * @param {string} historyPage - HTML of account page from https://biblioteka.librus.pl/opacWeb/history
+ * @returns {Array<{ type: string, inventoryNumber: string, signature: string, title: string, author: string, lendDate: string, returnDate: string, bookURL: string }>}
+ */
+function parseHistory(historyPage) {
+    const { document } = linkedom.parseHTML(historyPage);
+
+    // Get table
+    const historyTable = document.querySelector("table#tableRekordy > tbody");
+    const historyRecords = historyTable.querySelectorAll("tr");
+
+    let historyBooksParsed = [];
+
+    // Iterate through books
+    for (let i = 0; i < historyRecords.length; i++) {
+        const record = historyRecords[i].querySelectorAll("td");
+        let type = null;
+        let inventoryNumber = null;
+        let signature = null;
+        let title = null;
+        let author = null;
+        let lendDate = null;
+        let returnDate = null;
+        let bookURL = null;
+
+        // Iterate through attributes
+        for (let j = 0; j < record.length; j++) {
+            const recordData = record[j];
+
+            switch (j) {
+                // Type
+                case 0:
+                    if (!type) {
+                        const typeIcon = recordData.querySelector("i");
+                        type = typeIcon.getAttribute("title");
+                    }
+                    break;
+
+                // Inventory num
+                case 1:
+                    if (!inventoryNumber) {
+                        const inventoryNumberObj = recordData.querySelector("a");
+                        inventoryNumber = cleanField(inventoryNumberObj.textContent);
+
+                        if (!bookURL) bookURL = inventoryNumberObj.getAttribute("href"); // Parse book URL from a tag
+                    }
+                    break;
+
+                // Signature
+                case 2:
+                    if (!signature) signature = cleanField(recordData.querySelector("a").textContent);
+                    break;
+
+                // Title
+                case 3:
+                    if (!title) title = cleanField(recordData.querySelector("a.utils_ellipsis-multi-block").textContent);
+                    break;
+
+                // Author
+                case 4:
+                    if (!author) author = cleanField(recordData.querySelector("a.utils_ellipsis-multi-block").textContent);
+                    break;
+
+                // Lend date
+                case 5:
+                    if (!lendDate) lendDate = cleanField(recordData.querySelector("a").textContent);
+                    break;
+
+                // Return date
+                case 6:
+                    if (!returnDate) returnDate = cleanField(recordData.querySelector("a").textContent);
+                    break;
+            }
+        }
+
+        historyBooksParsed.push({
+            type: type,
+            inventoryNumber: inventoryNumber,
+            signature: signature,
+            title: title,
+            author: author,
+            lendDate: lendDate,
+            returnDate: returnDate,
+            bookURL: bookURL
+        });
+    }
+
+    return historyBooksParsed;
+}
+
 // For testing (node.js only)
-// const file = require("node:fs");
-// console.log(getBookInfo(file.readFileSync("pantadeusz.html").toString()));
-// console.log(getBookInfo(file.readFileSync("book.html").toString()));
+const file = require("node:fs");
+// console.log(parseBookInfo(file.readFileSync("monster.html").toString()));
+// console.log(parseHistory(file.readFileSync("history.html").toString()));
 
 module.exports = {
     parseLibraryInfo,
@@ -467,5 +560,6 @@ module.exports = {
     deleteTelemetry,
     parseLogoPath,
     parseVersion,
-    parseBookInfo
+    parseBookInfo,
+    parseHistory
 }
