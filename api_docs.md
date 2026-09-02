@@ -67,3 +67,59 @@ Returns your lent books and expiry dates
 - Parser function: no parser yet
 
 Returns your previously lent books
+
+### /opacWeb/item/{library_id}/show_record/{book_id}
+- Auth?: No
+- Parser function: ``getBookInfo()``
+
+Returns book info
+
+### /opacWeb/record/get_covers.json?bibliotekaid={library_id}&rekordid={book_id}
+- Auth?: No
+- Parser function: No parser yet
+
+Returns book cover info
+
+
+Books with covers:
+```json
+{
+    "central": [],
+    "altText": "Widmark, Martin Tajemnica biblioteki",
+    "minio": [
+        {
+            "okladkaId": 427195,
+            "pokazWOpac": true,
+            "glowna": true,
+            "nazwa": "Tajemnica biblioteki"
+        }
+    ],
+    "local": []
+}
+```
+- ``central`` - Unknown, probably something like ``minio`` from other server??
+- ``altText`` - Image alternative text
+- ``minio`` - MinIO? Hosted book covers
+- ``local`` - Unknown, locally hosted covers?
+
+Cover object (minio):
+- ``okladkaId`` - book cover ID
+- ``pokazWOpac`` - if true, cover will be shown in Opac/Website
+- ``glowna`` - if true, this is the main cover
+- ``nazwa`` - cover name
+
+Books without covers:
+```json
+{
+    "central": [],
+    "altText": "Mickiewicz, Adam Pan Tadeusz /",
+    "minio": [],
+    "local": []
+}
+```
+
+### /opacWeb/record/get_cover_minio.jpg?id={cover_id}
+Auth?: No
+Parser: No, this returns an image
+
+Returns cover image
