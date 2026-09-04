@@ -1,0 +1,48 @@
+<!--From https://biblioteka.librus.pl/opacWeb/bstart-->
+
+<div class="content" role="main">
+  <div class="content__container" id="bookSetContent123">
+    <fieldset class="content__field">
+      <legend role="heading" aria-level="4" class="content__legend">
+        Polecane przez bibliotekarza
+      </legend>
+      <div class="container">
+        <div class="row">
+          <div class="col-lg-12"></div>
+        </div>
+
+        <div id="zrUrl123" style="min-height: 237px">
+          <i class="fa fa-spin fa-3x fa-spinner col-md-offset-6"></i>
+
+          <a
+            href="/opacWeb/book_sets_start/123/show/123"
+            id="zrUrl123"
+            style="display: none"
+          ></a>
+          <script>
+            $(document).ready(function () {
+              var result;
+              $.ajax({
+                type: "GET",
+                url: $("#zrUrl123").prop("href"),
+                async: true,
+                success: function (data) {
+                  if (
+                    data.trim().length == 0 ||
+                    data.indexOf("<!--  EMPTY  -->") >= 0
+                  )
+                    $("#bookSetContent123").remove();
+                  else {
+                    result = data;
+                    $("#bookSet123").html(result);
+                    fixCarousel("bookSetContent123");
+                  }
+                },
+              });
+            });
+          </script>
+        </div>
+      </div>
+    </fieldset>
+  </div>
+</div>

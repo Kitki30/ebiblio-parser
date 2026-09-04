@@ -15,7 +15,8 @@
   "type": "module",
   "exports": "./index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "node --test",
+    "build": "npx esbuild --bundle --format=esm --target=es2020 --outfile=dist/bundle.js --inject:./qjs_fix.js --external:std index.js"
   },
   "dependencies": {
     "buffer": "^6.0.3",

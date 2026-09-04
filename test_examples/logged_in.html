@@ -1,0 +1,27 @@
+<!--From https://biblioteka.librus.pl/opacWeb/bstart-->
+
+<html>
+  <body>
+    <script>
+      var pageContext = document.getElementById("pageContext").href;
+      pageContext = pageContext.substring(0, pageContext.length - 1);
+      var bibliotekaId = 123;
+      var zalogowany = true;
+    </script>
+
+    <header>
+      <div class="container">
+        <div class="row menu-row">
+          <div
+            class="logged-as hidden-lg hidden-md add-tooltip"
+            data-toggle="tooltip"
+            data-placement="bottom"
+            data-original-title="1234567u"
+          >
+            Zalogowany: 1234567u
+          </div>
+        </div>
+      </div>
+    </header>
+  </body>
+</html>
