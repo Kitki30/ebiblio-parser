@@ -4,7 +4,7 @@ import * as linkedom from "linkedom";
 const allowPIILogs = true; // Allow PII (Personally Identifiable Information) to logs, this may contain your school/library address, logins, emails, books etc.
 const noTelemetry = true; // Enable to replace "?from=" query parameters with nothing
 
-if (allowPIILogs) console.warn("Allow PII Logs is on, library will log your personal info on error for better debugging!");
+if (allowPIILogs) console.log("Allow PII Logs is on, library will log your personal info on error for better debugging!");
 
 function cleanField(text) {
     return text
@@ -66,11 +66,11 @@ export function parseLibraryInfo(mainPageHtml) {
     else {
         // Check if header length valid
         if (parsedHeader.length != 3) {
-            console.warn(`Error parsing library info! Header doesn't match any type (Array length: ${parsedHeader.length}, should be 3 or 4)`);
+            console.log(`Error parsing library info! Header doesn't match any type (Array length: ${parsedHeader.length}, should be 3 or 4)`);
 
             if (allowPIILogs) {
-                console.warn("Allow PII logs is on, dropping info:");
-                console.warn(parsedHeader);
+                console.log("Allow PII logs is on, dropping info:");
+                console.log(parsedHeader);
             }
         }
 
@@ -385,7 +385,7 @@ export function parseBookInfo(bookPage) {
 
             // Fallback if unknown
             default:
-                console.warn(`Unknown field '${fieldName}' with value '${fieldClean}'`);
+                console.log(`Unknown field '${fieldName}' with value '${fieldClean}'`);
                 break;
         }
     }
@@ -544,7 +544,10 @@ export function parseHistory(historyPage) {
     return historyBooksParsed;
 }
 
-// For testing (node.js only)
+// For testing (node.js)
 // import * as file from 'node:fs';
 // console.log(parseBookInfo(file.readFileSync("monster.html").toString()));
-// console.log(parseHistory(file.readFileSync("history.html").toString()));
+
+// For testing (quickjs)
+// import * as std from 'std';
+// console.log(parseBookInfo(std.loadFile("monster.html").toString()));
